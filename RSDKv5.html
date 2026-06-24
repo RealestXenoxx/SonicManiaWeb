@@ -1,3 +1,4 @@
+
 <!doctype html>
 <!--suppress HtmlFormInputWithoutLabel, JSDeprecatedSymbols -->
 <html lang="en-us">
@@ -104,16 +105,10 @@
 				color: rgb(120, 120, 120);
 			}
 
-			/* ============================================ */
-			/* CENTERED LOADING BAR - FIXED */
-			/* ============================================ */
 			#progress {
 				height: 20px;
 				width: 300px;
-				margin: 0 auto;  /* ← THIS CENTERS IT */
-				display: block;  /* ← MAKES IT A BLOCK ELEMENT */
 			}
-			/* ============================================ */
 
 			#output {
 				width: 100%;
@@ -129,46 +124,12 @@
 				font-family: 'Lucida Console', Monaco, monospace;
 				outline: none;
 			}
-
-			/* Additional centering for the loading elements */
-			.loading-container {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-				height: 100vh;
-				width: 100%;
-				position: fixed;
-				top: 0;
-				left: 0;
-				z-index: 10;
-				pointer-events: none;
-			}
-
-			.loading-container .spinner,
-			.loading-container #status,
-			.loading-container #progress {
-				margin-left: 0;  /* Remove left margin from spinner */
-			}
-
-			.loading-container .spinner {
-				margin: 0 auto 10px auto;
-			}
-
-			.loading-container #status {
-				margin: 10px auto 0 auto;
-			}
 		</style>
 	</head>
 	<body>
-		<!-- Centered Loading Container -->
-		<div class="loading-container" id="loadingContainer">
-			<div class="spinner" id="spinner" style="display: none;"></div>
-			<div id="status" style="display: none;">Downloading...</div>
-			<progress id="progress" value="0" max="100" hidden="hidden"></progress>
-		</div>
-
-		<!-- Game Canvas -->
+		<div class="spinner" id="spinner" style="display: none;"></div>
+		<div id="status" style="display: none;">Downloading...</div>
+		<progress id="progress" value="0" max="100" hidden="hidden"></progress>
 		<canvas id="canvas" onclick="window.focus();" oncontextmenu="event.preventDefault();"></canvas>
 		<textarea id="output" style="display: none;" rows="8"></textarea>
 
