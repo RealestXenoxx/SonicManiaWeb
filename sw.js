@@ -1,9 +1,9 @@
-var _cacheName = 'sonicmania-9282022';
+var _cacheName = 'sonicmania-discord-1';
 var _cacheFiles = [
 	'RSDKv5.html',
 	'RSDKv5.js',
 	'RSDKv5.wasm',
-  'https://files.catbox.moe/xsfgty.rsdk'
+	'https://1518811573840253048.discordsays.com/gamedata/xsfgty.rsdk'
 ];
 	
 self.addEventListener('install', (e) => {
