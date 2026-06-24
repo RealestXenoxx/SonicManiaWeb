@@ -139,92 +139,103 @@
 		<textarea id="output" rows="8"></textarea>
 
 		<script type="text/javascript">
-			if ('serviceWorker' in navigator) {
-				navigator.serviceWorker.register('sw.js').then(function(registration) {
-					registration.addEventListener('updatefound', function() {
-						var installingWorker = registration.installing;
-						console.log('A new service worker is being installed:', installingWorker);
-					});
-				}, function(err) {
-					console.log('ServiceWorker registration failed: ', err);
-				});
-			}
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(function(registration) {
+            registration.addEventListener('updatefound', function() {
+                var installingWorker = registration.installing;
+                console.log('A new service worker is being installed:', installingWorker);
+            });
+        }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    }
 
-			var statusElement = document.getElementById('status');
-			var progressElement = document.getElementById('progress');
-			var spinnerElement = document.getElementById('spinner');
-			var loadingContainer = document.getElementById('loadingContainer');
+    var statusElement = document.getElementById('status');
+    var progressElement = document.getElementById('progress');
+    var spinnerElement = document.getElementById('spinner');
+    var loadingContainer = document.getElementById('loadingContainer');
 
-			var Module = {
-				preRun: [],
-				postRun: [],
-				print: (function () {
-					var element = document.getElementById('output');
-					return function (text) {
-						if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-						console.log(text);
-						if (element) {
-							element.value += text + "\n";
-							element.scrollTop = element.scrollHeight;
-						}
-					};
-				})(),
-				printErr: function (text) {
-					if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-					console.error(text);
-				},
-				canvas: (function () {
-					var canvas = document.getElementById('canvas');
-					canvas.addEventListener("webglcontextlost", function (e) {
-						alert('WebGL context lost. You will need to reload the page.');
-						e.preventDefault();
-					}, false);
-					return canvas;
-				})(),
-				setStatus: function (text) {
-					if (!Module.setStatus.last) Module.setStatus.last = {time: Date.now(), text: ''};
-					if (text === Module.setStatus.last.text) return;
+    function hideLoader() {
+        loadingContainer.style.opacity = "0";
+        setTimeout(() => {
+            loadingContainer.style.display = "none";
+        }, 300);
+    }
 
-					var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-					var now = Date.now();
-					if (m && now - Module.setStatus.last.time < 30) return;
+    var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function () {
+            var element = document.getElementById('output');
+            return function (text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                console.log(text);
+                if (element) {
+                    element.value += text + "\n";
+                    element.scrollTop = element.scrollHeight;
+                }
+            };
+        })(),
+        printErr: function (text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            console.error(text);
+        },
+        canvas: (function () {
+            var canvas = document.getElementById('canvas');
+            canvas.addEventListener("webglcontextlost", function (e) {
+                alert('WebGL context lost. You will need to reload the page.');
+                e.preventDefault();
+            }, false);
+            return canvas;
+        })(),
+        setStatus: function (text) {
+            if (!Module.setStatus.last) Module.setStatus.last = {time: Date.now(), text: ''};
+            if (text === Module.setStatus.last.text) return;
 
-					Module.setStatus.last.time = now;
-					Module.setStatus.last.text = text;
+            var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+            var now = Date.now();
+            if (m && now - Module.setStatus.last.time < 30) return;
 
-					if (m) {
-						text = m[1].trim();
-						progressElement.value = parseInt(m[2]) * 100;
-						progressElement.max = parseInt(m[4]) * 100;
-						progressElement.hidden = false;
-					} else {
-						progressElement.hidden = true;
-					}
+            Module.setStatus.last.time = now;
+            Module.setStatus.last.text = text;
 
-					statusElement.innerHTML = text || 'Loading...';
-				},
-				totalDependencies: 0,
-				monitorRunDependencies: function (left) {
-					this.totalDependencies = Math.max(this.totalDependencies, left);
-					Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
-				}
-			};
+            if (m) {
+                text = m[1].trim();
+                progressElement.value = parseInt(m[2]) * 100;
+                progressElement.max = parseInt(m[4]) * 100;
+                progressElement.hidden = false;
+            } else {
+                progressElement.hidden = true;
+            }
 
-			// Hide loading screen when game starts
-			Module.postRun.push(function() {
-				setTimeout(() => {
-					loadingContainer.style.display = 'none';
-				}, 500);
-			});
+            statusElement.innerHTML = text || 'Loading...';
 
-			Module.setStatus('Downloading...');
-			window.onerror = function () {
-				Module.setStatus('Exception thrown, see JavaScript console');
-				Module.setStatus = function (text) {
-					if (text) Module.printErr('[post-exception status] ' + text);
-				};
-			};
-		</script>
+            // Hide loader when downloads finish
+            if (text === "All downloads complete.") {
+                hideLoader();
+            }
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function (left) {
+            this.totalDependencies = Math.max(this.totalDependencies, left);
+            Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+        }
+    };
+
+    // Hide loader when WASM runtime is ready
+    Module.onRuntimeInitialized = function () {
+        hideLoader();
+    };
+
+    Module.setStatus('Downloading...');
+
+    window.onerror = function () {
+        Module.setStatus('Exception thrown, see JavaScript console');
+        Module.setStatus = function (text) {
+            if (text) Module.printErr('[post-exception status] ' + text);
+        };
+    };
+</script>
 		<script src="discord-presence.js"></script>
 		<script async="async" defer="defer" type="text/javascript" src="RSDKv5.js"></script>
 	</body>
