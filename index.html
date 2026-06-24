@@ -1,1 +1,505 @@
-<meta http-equiv="Refresh" content="0; url='RSDKv5.html'" />
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Sonic Mania - Discord Activity</title>
+
+    <link type="text/css" rel="stylesheet" href="https://rawcdn.githack.com/burnedpopcorn/SonicManiaPlusWebPort/main/css/fonts.css" />
+    
+    <style>
+        /* Reset and base styles */
+        html, body {
+            font-family: arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            text-align: center;
+        }
+
+        canvas {
+            height: 100%;
+            margin: auto;
+            padding: 0;
+            border: 0 none;
+            background-color: #000;
+            -ms-interpolation-mode: nearest-neighbor;
+            image-rendering: optimizeSpeed;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .spinner {
+            height: 30px;
+            width: 30px;
+            margin: 20px 0 0 20px;
+            display: inline-block;
+            vertical-align: top;
+            -webkit-animation: rotation .8s linear infinite;
+            -moz-animation: rotation .8s linear infinite;
+            -o-animation: rotation .8s linear infinite;
+            animation: rotation 0.8s linear infinite;
+            border-left: 5px solid rgb(235, 235, 235);
+            border-right: 5px solid rgb(235, 235, 235);
+            border-bottom: 5px solid rgb(235, 235, 235);
+            border-top: 5px solid rgb(120, 120, 120);
+            border-radius: 100%;
+            background-color: rgb(189, 215, 46);
+        }
+
+        @-webkit-keyframes rotation {
+            from { -webkit-transform: rotate(0deg); }
+            to { -webkit-transform: rotate(360deg); }
+        }
+        @-moz-keyframes rotation {
+            from { -moz-transform: rotate(0deg); }
+            to { -moz-transform: rotate(360deg); }
+        }
+        @-o-keyframes rotation {
+            from { -o-transform: rotate(0deg); }
+            to { -o-transform: rotate(360deg); }
+        }
+        @keyframes rotation {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        #status {
+            display: inline-block;
+            vertical-align: top;
+            margin-top: 30px;
+            margin-left: 20px;
+            font-weight: bold;
+            color: rgb(120, 120, 120);
+        }
+
+        #progress {
+            height: 20px;
+            width: 300px;
+        }
+
+        /* SONIC THEMED LOADING SCREEN */
+        #discord-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            color: white;
+            font-family: 'Whitney', 'Helvetica Neue', Arial, sans-serif;
+            transition: opacity 0.5s ease;
+        }
+
+        #discord-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sonic-loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .sonic-runner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .sonic-sprite {
+            font-size: 4rem;
+            animation: sonicRun 0.5s steps(4) infinite;
+            display: inline-block;
+        }
+
+        @keyframes sonicRun {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(10px) rotate(-5deg); }
+            50% { transform: translateX(0) rotate(0deg); }
+            75% { transform: translateX(-10px) rotate(5deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+
+        .ring-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffcc00;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: ringSpin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+        }
+
+        @keyframes ringSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sonic-title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffcc00 0%, #ff8800 50%, #ff4400 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 136, 0, 0.3);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .loading-bar-container {
+            width: 80%;
+            max-width: 400px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 204, 0, 0.2);
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffcc00, #ff8800);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+        }
+
+        .loading-text {
+            color: #fff;
+            font-size: 1rem;
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+
+        .loading-hint {
+            color: #8899aa;
+            font-size: 0.8rem;
+            margin-top: 30px;
+            max-width: 500px;
+            text-align: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Courier New', monospace;
+        }
+
+        .loading-hint kbd {
+            background: #2a2a4a;
+            color: #ffcc00;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid #444466;
+        }
+
+        #retry-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #5865F2;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        @media (max-width: 600px) {
+            .sonic-title { font-size: 2rem; }
+            .sonic-sprite { font-size: 3rem; }
+            .loading-hint { font-size: 0.7rem; padding: 8px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- SONIC THEMED LOADING SCREEN -->
+    <div id="discord-overlay">
+        <div class="sonic-loader-container">
+            <div class="sonic-runner">
+                <div class="sonic-sprite">⚡</div>
+                <div class="ring-spinner"></div>
+            </div>
+            
+            <h1 class="sonic-title">🦔 SONIC MANIA</h1>
+            
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loading-bar"></div>
+            </div>
+            
+            <p class="loading-text" id="status-message">Loading Zone... 🌀</p>
+            
+            <p class="loading-hint">
+                🎮 Main menu crashes? Press <kbd>ESC</kbd> to use the Dev Menu to access levels
+            </p>
+            
+            <button id="retry-btn">Retry Connection</button>
+        </div>
+    </div>
+
+    <!-- Game Elements -->
+    <div class="spinner" id="spinner" style="display: none;"></div>
+    <div id="status" style="display: none;">Downloading...</div>
+    <progress id="progress" value="0" max="100" hidden="hidden"></progress>
+    <canvas id="canvas" onclick="window.focus();" oncontextmenu="event.preventDefault();"></canvas>
+    <textarea id="output" style="display: none;" rows="8"></textarea>
+
+    <!-- Discord SDK Script -->
+    <script type="importmap">
+        {
+            "imports": {
+                "@discord/embedded-app-sdk": "https://unpkg.com/@discord/embedded-app-sdk@1.0.0/dist/index.mjs"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { DiscordSDK } from '@discord/embedded-app-sdk';
+        
+        const CLIENT_ID = '1518811573840253048';
+        
+        const overlay = document.getElementById('discord-overlay');
+        const statusMessage = document.getElementById('status-message');
+        const retryBtn = document.getElementById('retry-btn');
+        const loadingBar = document.getElementById('loading-bar');
+
+        function updateStatus(message, isError = false) {
+            statusMessage.textContent = message;
+            
+            // Update loading bar
+            if (loadingBar) {
+                if (message.includes('Initializing')) loadingBar.style.width = '10%';
+                else if (message.includes('Connecting')) loadingBar.style.width = '25%';
+                else if (message.includes('Authenticating')) loadingBar.style.width = '50%';
+                else if (message.includes('Welcome')) loadingBar.style.width = '75%';
+                else if (message.includes('Ready')) loadingBar.style.width = '100%';
+                else if (message.includes('Loading game')) loadingBar.style.width = '90%';
+                else if (message.includes('Error')) loadingBar.style.width = '100%';
+            }
+            
+            if (isError) {
+                overlay.classList.add('error');
+                retryBtn.style.display = 'block';
+            } else {
+                overlay.classList.remove('error');
+                retryBtn.style.display = 'none';
+            }
+        }
+
+        function hideOverlay() {
+            overlay.classList.add('hidden');
+            // Load the game after overlay hides
+            setTimeout(() => {
+                loadGame();
+            }, 500);
+        }
+
+        async function initDiscord() {
+            try {
+                updateStatus('Initializing Discord SDK...');
+                const discordSdk = new DiscordSDK(CLIENT_ID);
+                await discordSdk.ready();
+                updateStatus('Connecting to Discord...');
+                
+                const { code } = await discordSdk.commands.authorize({
+                    client_id: CLIENT_ID,
+                    response_type: 'code',
+                    state: '',
+                    prompt: 'none',
+                    scope: ['identify', 'guilds'],
+                });
+
+                updateStatus('Authenticating...');
+
+                try {
+                    const response = await fetch('/api/token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code }),
+                    });
+
+                    if (!response.ok) throw new Error('Failed to get token');
+                    const { access_token } = await response.json();
+                    await discordSdk.commands.authenticate({ access_token });
+                } catch (error) {
+                    console.warn('Auth error:', error);
+                }
+
+                try {
+                    const user = await discordSdk.commands.getUser();
+                    updateStatus(`Welcome, ${user.username}!`);
+                } catch (e) {
+                    console.warn('User info error:', e);
+                }
+
+                updateStatus('Ready to play!');
+                setTimeout(() => {
+                    hideOverlay();
+                }, 1000);
+
+                window.discordSdk = discordSdk;
+                return discordSdk;
+
+            } catch (error) {
+                console.error('Discord Error:', error);
+                updateStatus(`Error: ${error.message}`, true);
+                setTimeout(() => {
+                    hideOverlay();
+                }, 3000);
+                return null;
+            }
+        }
+
+        function loadGame() {
+            // Load the game via RSDKv5.html
+            const gameScript = document.createElement('script');
+            gameScript.src = 'RSDKv5.js';
+            gameScript.async = true;
+            gameScript.defer = true;
+            gameScript.onerror = () => updateStatus('Game load failed', true);
+            document.body.appendChild(gameScript);
+            
+            // Also load the main game page
+            const iframe = document.createElement('iframe');
+            iframe.src = 'RSDKv5.html';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.style.position = 'fixed';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.zIndex = '1';
+            document.body.appendChild(iframe);
+        }
+
+        retryBtn.addEventListener('click', () => {
+            retryBtn.style.display = 'none';
+            overlay.classList.remove('error');
+            initDiscord();
+        });
+
+        // Start the app
+        updateStatus('Initializing...');
+        initDiscord();
+
+        // Fallback: load game after 10s if Discord is stuck
+        setTimeout(() => {
+            if (!overlay.classList.contains('hidden')) {
+                updateStatus('Loading game...');
+                setTimeout(() => { hideOverlay(); }, 2000);
+            }
+        }, 10000);
+    </script>
+
+    <!-- Game loading script (original) -->
+    <script>
+        (function() {
+            const ogxhr = window.XMLHttpRequest;
+
+            function xhrfunc() {
+                const xhr = new ogxhr();
+                const open = xhr.open;
+                xhr.open = function(method, url, ...rest) {
+                    if (url.includes("version.txt")) {
+                        return open.call(this, method, "updates/version.txt", ...rest);
+                    }
+                    return open.call(this, method, url, ...rest);
+                };
+                return xhr;
+            }
+            window.XMLHttpRequest = xhrfunc;
+
+            var statusElement = document.getElementById('status');
+            var progressElement = document.getElementById('progress');
+            var spinnerElement = document.getElementById('spinner');
+
+            window.Module = window.Module || {};
+            Object.assign(window.Module, {
+                preRun: [],
+                postRun: [],
+                print: (function () {
+                    var element = document.getElementById('output');
+                    if (element) element.value = '';
+                    return function (text) {
+                        if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                        console.log(text);
+                        if (element) {
+                            element.value += text + "\n";
+                            element.scrollTop = element.scrollHeight;
+                        }
+                    };
+                })(),
+                printErr: function (text) {
+                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                    console.error(text);
+                },
+                canvas: (function () {
+                    var canvas = document.getElementById('canvas');
+                    canvas.addEventListener("webglcontextlost", function (e) {
+                        alert('WebGL context lost. You will need to reload the page.');
+                        e.preventDefault();
+                    }, false);
+                    return canvas;
+                })(),
+                setStatus: function (text) {
+                    if (!Module.setStatus.last) Module.setStatus.last = {time: Date.now(), text: ''};
+                    if (text === Module.setStatus.last.text) return;
+                    var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                    var now = Date.now();
+                    if (m && now - Module.setStatus.last.time < 30) return;
+                    Module.setStatus.last.time = now;
+                    Module.setStatus.last.text = text;
+                    if (m) {
+                        text = m[1];
+                        progressElement.value = parseInt(m[2]) * 100;
+                        progressElement.max = parseInt(m[4]) * 100;
+                        progressElement.hidden = false;
+                        spinnerElement.hidden = false;
+                    } else {
+                        progressElement.value = null;
+                        progressElement.max = null;
+                        progressElement.hidden = true;
+                        if (!text) spinnerElement.style.display = 'none';
+                    }
+                    statusElement.innerHTML = text;
+                },
+                totalDependencies: 0,
+                monitorRunDependencies: function (left) {
+                    this.totalDependencies = Math.max(this.totalDependencies, left);
+                    Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+                }
+            });
+            Module.setStatus('Downloading...');
+            window.onerror = function () {
+                Module.setStatus('Exception thrown, see JavaScript console');
+                spinnerElement.style.display = 'none';
+                Module.setStatus = function (text) {
+                    if (text) Module.printErr('[post-exception status] ' + text);
+                };
+            };
+        })();
+    </script>
+</body>
+</html>
